@@ -1,0 +1,51 @@
+<header class="flex items-center justify-between mb-8">
+  <h2 class="text-2xl font-bold tracking-tight">Home Explorer</h2>
+  <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 text-xs font-mono border border-zinc-800 text-green-400">
+    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> SYSTEM OK
+  </div>
+</header>
+
+<!-- Section 1: Developer Focus -->
+<section class="mb-10">
+  <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-4">Featured Audio</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    @for (track of featuredTracks; track track.id) {
+      <div (click)="selectTrack(track)" 
+           [class.border-green-500]="activeTrack()?.id === track.id"
+           class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition cursor-pointer flex flex-col justify-between">
+        <div class="w-full aspect-square bg-zinc-950 rounded mb-3 flex items-center justify-center text-3xl select-none">
+          {{ track.coverIcon }}
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm truncate" [class.text-green-400]="activeTrack()?.id === track.id">{{ track.title }}</h4>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">{{ track.artist }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Section 2: Junaid Jamshed Collections -->
+<section>
+  <h3 class="text-xs font-bold uppercase tracking-wider text-green-500/80 mb-4 font-mono">Spiritual & Reflections — Junaid Jamshed</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    @for (track of spiritualTracks; track track.id) {
+      <div (click)="selectTrack(track)" 
+           [class.border-green-500]="activeTrack()?.id === track.id"
+           class="p-4 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition cursor-pointer flex flex-col justify-between">
+        <div class="w-full aspect-square bg-zinc-950 rounded mb-3 flex items-center justify-center text-3xl select-none">
+          {{ track.coverIcon }}
+        </div>
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <h4 class="font-semibold text-sm truncate" [class.text-green-400]="activeTrack()?.id === track.id">{{ track.title }}</h4>
+            @if (activeTrack()?.id === track.id && isPlaying()) {
+              <span class="text-xs text-green-400 animate-bounce">🎵</span>
+            }
+          </div>
+          <p class="text-xs text-zinc-400 truncate mt-0.5">{{ track.type }} — {{ track.artist }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>
