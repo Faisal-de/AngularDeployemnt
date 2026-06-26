@@ -1,7 +1,6 @@
 <div class="flex h-screen flex-col bg-zinc-950 text-zinc-100 font-sans antialiased selection:bg-green-500 selection:text-black">
   <div class="flex flex-1 overflow-hidden p-2 gap-2">
     
-    <!-- Sidebar Navigation -->
     <aside class="w-64 bg-zinc-900 rounded-lg flex flex-col p-4 border border-zinc-800/50">
       <div class="flex items-center gap-2 px-2 mb-6">
         <span class="text-green-500 font-black text-2xl tracking-tighter">VIBESTREAM</span>
@@ -16,17 +15,14 @@
       </nav>
     </aside>
 
-    <!-- Main Dynamic Window Panel -->
     <main class="flex-1 bg-zinc-900 rounded-lg overflow-y-auto p-6 border border-zinc-800/50">
       <router-outlet />
     </main>
 
   </div>
 
-  <!-- Global Streaming Player Footer Bar -->
   <footer class="h-20 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between z-10">
     
-    <!-- Left side reactive track metadata -->
     <div class="flex items-center gap-3 w-1/4">
       <div class="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-xl select-none">
         {{ activeTrack() ? activeTrack()?.coverIcon : '🎵' }}
@@ -41,27 +37,31 @@
       </div>
     </div>
 
-    <!-- Center playback controls -->
     <div class="flex flex-col items-center gap-1.5 max-w-xl w-2/5">
       <div class="flex items-center gap-5 text-zinc-400">
-        <button class="hover:text-white transition">⏮</button>
+        <button (click)="handleSkip(-5)" class="hover:text-white transition text-lg" title="Skip back 5s">⏪</button>
+        
         <button (click)="handlePlaybackToggle()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold hover:scale-105 transition">
           {{ isPlaying() ? '⏸' : '▶' }}
         </button>
-        <button class="hover:text-white transition">⏭</button>
+        
+        <button (click)="handleSkip(5)" class="hover:text-white transition text-lg" title="Skip forward 5s">⏩</button>
       </div>
       
-      <!-- Track dynamic timeline placeholder layout -->
       <div class="w-full flex items-center gap-2 text-[10px] text-zinc-400 font-mono">
-        <span>0:00</span>
-        <div class="h-1 flex-1 bg-zinc-800 rounded-full overflow-hidden">
-          <div class="h-full bg-green-500 rounded-full transition-all duration-300" [class.w-full]="isPlaying()" [class.w-0]="!isPlaying()"></div>
-        </div>
-        <span>3:45</span>
+        <span>{{ currentTimeFormatted() }}</span>
+        
+        <input type="range" 
+               class="flex-1 h-1 bg-zinc-800 accent-green-500 rounded-full appearance-none cursor-pointer outline-none"
+               [value]="currentTime()" 
+               [min]="0"
+               [max]="duration() || 100" 
+               (input)="handleSeek($event)" />
+               
+        <span>{{ durationFormatted() }}</span>
       </div>
     </div>
 
-    <!-- Right side static system volume panel -->
     <div class="w-1/4 flex justify-end items-center gap-2 text-zinc-400">
       <span class="text-xs">🔊</span>
       <div class="w-24 h-1 bg-zinc-800 rounded-full overflow-hidden">
