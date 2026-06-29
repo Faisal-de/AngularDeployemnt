@@ -18,6 +18,6 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'dist/telemetry-hub/browser'
+    PathtoPublish: 'novagrid-workspace/dist/telemetry-hub/browser'
     ArtifactName: 'drop'
     publishLocation: 'Container'
