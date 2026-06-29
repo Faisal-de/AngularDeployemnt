@@ -18,7 +18,8 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    Contents: '**/dist/**'
+    SourceFolder: '$(Build.SourcesDirectory)/novagrid-workspace/dist/telemetry-hub/browser'
+    Contents: '**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
   displayName: 'Stage built assets'
 
