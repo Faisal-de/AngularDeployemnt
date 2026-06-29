@@ -16,8 +16,7 @@ steps:
     npx ng build telemetry-hub --configuration=production
   displayName: 'npm install and build telemetry-hub'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/novagrid-workspace/dist/telemetry-hub/browser'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+- script: |
+    cd novagrid-workspace
+    dir /s /b index.html
+  displayName: 'Find Exact Path of index.html'
