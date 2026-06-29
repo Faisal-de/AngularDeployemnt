@@ -16,8 +16,15 @@ steps:
     npx ng build telemetry-hub --configuration=production
   displayName: 'npm install and build telemetry-hub'
 
+- task: CopyFiles@2
+  inputs:
+    Contents: '**/dist/**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Stage built assets'
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/novagrid-workspace/dist/telemetry-hub/browser'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+  displayName: 'Publish Artifacts'
