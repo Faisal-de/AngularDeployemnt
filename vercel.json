@@ -1,0 +1,6 @@
+{
+  "cleanUrls": true,
+  "framework": null,
+  "buildCommand": "echo 'Skipping build, using Azure DevOps artifacts'",
+  "outputDirectory": "novagrid-workspace/dist/telemetry-hub/browser"
+}
