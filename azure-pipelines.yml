@@ -13,7 +13,7 @@ steps:
 - script: |
     cd novagrid-workspace
     npm install
-    npx ng build telemetry-hub --configuration=production --base-href ./
+    npx ng build telemetry-hub --configuration=production --base-href /
   displayName: 'npm install and build telemetry-hub'
 
 - powershell: |
