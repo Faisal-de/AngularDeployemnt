@@ -11,14 +11,13 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    cd novagrid-workspace
     npm install
     npx ng build telemetry-hub --configuration=production
   displayName: 'npm install and build telemetry-hub'
 
 - task: CopyFiles@2
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/novagrid-workspace'
+    SourceFolder: '$(Build.SourcesDirectory)'
     Contents: '**/dist/**/browser/**'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     flattenFolders: true
