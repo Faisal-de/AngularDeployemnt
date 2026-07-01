@@ -11,15 +11,14 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    cd novagrid-workspace
     npm install
-    npx ng build telemetry-hub --configuration=production --base-href /
-  displayName: 'npm install and build telemetry-hub'
+    npx ng build telemetry-hub-player --configuration=production --base-href /
+  displayName: 'npm install and build telemetry-hub-player'
 
 - powershell: |
-    # Explicitly target the production compilation path inside novagrid-workspace
-    $targetPath = "novagrid-workspace\dist\telemetry-hub\browser"
-    $fallbackPath = "novagrid-workspace\dist\telemetry-hub"
+    # Target the production compilation path directly in the root dist folder
+    $targetPath = "dist\telemetry-hub-player\browser"
+    $fallbackPath = "dist\telemetry-hub-player"
     
     if (Test-Path $targetPath) {
         Write-Host "SUCCESS: Found compiled directory at $targetPath"
@@ -28,7 +27,7 @@ steps:
         Write-Host "SUCCESS: Found compiled directory at fallback $fallbackPath"
         Copy-Item -Path "$fallbackPath\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
     } else {
-        Write-Error "CRITICAL: Could not locate the Angular distribution build directory inside novagrid-workspace\dist!"
+        Write-Error "CRITICAL: Could not locate the Angular distribution build directory inside dist!"
         exit 1
     }
   displayName: 'Stage compiled assets strictly'
