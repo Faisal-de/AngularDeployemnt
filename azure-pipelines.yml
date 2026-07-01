@@ -17,35 +17,18 @@ steps:
   displayName: 'npm install and build telemetry-hub'
 
 - powershell: |
-    Write-Host "Starting automatic build directory discovery..."
+    # Explicitly target the production compilation path inside novagrid-workspace
+    $targetPath = "novagrid-workspace\dist\telemetry-hub\browser"
+    $fallbackPath = "novagrid-workspace\dist\telemetry-hub"
     
-    # 1. Find every folder containing an index.html file
-    $allFolders = Get-ChildItem -Path . -Filter "index.html" -Recurse | Select-Object -ExpandProperty DirectoryName -Unique
-    $targetFolder = $null
-    
-    Write-Host "Folders containing index.html found:"
-    foreach ($folder in $allFolders) {
-        Write-Host " - Found path: $folder"
-        
-        # Skip source directories and dependencies
-        if ($folder -like "*node_modules*" -or $folder -like "*\src*" -or (Test-Path (Join-Path $folder "main.ts"))) {
-            Write-Host "   => Skipping (detected as source code or node_modules)"
-            continue
-        }
-        
-        # If it contains an index.html and isn't source code, this is our compiled directory!
-        $targetFolder = $folder
-        Write-Host "   => Match found! Selected as production build folder."
-        break
-    }
-    
-    # 2. Copy the discovered files safely
-    if ($targetFolder) {
-        Write-Host "Staging assets from: $targetFolder"
-        Copy-Item -Path "$targetFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-        Write-Host "SUCCESS: Assets staged successfully."
+    if (Test-Path $targetPath) {
+        Write-Host "SUCCESS: Found compiled directory at $targetPath"
+        Copy-Item -Path "$targetPath\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
+    } elseif (Test-Path $fallbackPath) {
+        Write-Host "SUCCESS: Found compiled directory at fallback $fallbackPath"
+        Copy-Item -Path "$fallbackPath\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
     } else {
-        Write-Error "CRITICAL ERROR: Could not locate a compiled production build directory. Please check your angular.json file for 'outputPath'."
+        Write-Error "CRITICAL: Could not locate the Angular distribution build directory inside novagrid-workspace\dist!"
         exit 1
     }
   displayName: 'Stage compiled assets strictly'
