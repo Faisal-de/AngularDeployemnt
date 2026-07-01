@@ -10,38 +10,36 @@ steps:
     versionSpec: '20.x'
   displayName: 'Install Node.js'
 
-# STEP 1: Run dependencies installation on its own
-- script: npm install
+# STEP 1: Enter the true workspace folder and install dependencies
+- script: |
+    cd novagrid-workspace
+    npm install
   displayName: 'npm install dependencies'
 
-# STEP 2: Run the Angular compilation independently so it cannot be skipped
-- script: npx ng build telemetry-hub-player --configuration=production --base-href /
+# STEP 2: Enter the true workspace folder and run the pure production build
+- script: |
+    cd novagrid-workspace
+    npx ng build telemetry-hub-player --configuration=production
   displayName: 'Execute Angular Production Build'
 
-# STEP 3: Stage the compiled assets securely
+# STEP 3: Stage the compiled distribution files directly from the true build directory
 - powershell: |
-    Write-Host "Searching for compiled production directory..."
+    Write-Host "Locating compiled production assets folder..."
     
-    # Check both potential default workspace output variants
-    $targetPath = "dist\telemetry-hub-player\browser"
-    $fallbackPath = "dist\telemetry-hub-player"
-    $novagridTarget = "novagrid-workspace\dist\telemetry-hub-player\browser"
-    $novagridFallback = "novagrid-workspace\dist\telemetry-hub-player"
+    # This matches the exact folder structure verified in your VS Code sidebar
+    $productionFolder = "novagrid-workspace\dist\telemetry-hub-player\browser"
+    $fallbackFolder = "novagrid-workspace\dist\telemetry-hub-player"
     
-    if (Test-Path $targetPath) {
-        Write-Host "SUCCESS: Found output at $targetPath"
-        Copy-Item -Path "$targetPath\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-    } elseif (Test-Path $fallbackPath) {
-        Write-Host "SUCCESS: Found output at $fallbackPath"
-        Copy-Item -Path "$fallbackPath\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-    } elseif (Test-Path $novagridTarget) {
-        Write-Host "SUCCESS: Found output at $novagridTarget"
-        Copy-Item -Path "$novagridTarget\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-    } elseif (Test-Path $novagridFallback) {
-        Write-Host "SUCCESS: Found output at $novagridFallback"
-        Copy-Item -Path "$novagridFallback\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-    } else {
-        Write-Error "CRITICAL: The compiled output folder could not be found anywhere. Check build logs for compilation errors."
+    if (Test-Path $productionFolder) {
+        Write-Host "SUCCESS: Target build directory found at: $productionFolder"
+        Copy-Item -Path "$productionFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
+    } 
+    elif (Test-Path $fallbackFolder) {
+        Write-Host "SUCCESS: Target fallback directory found at: $fallbackFolder"
+        Copy-Item -Path "$fallbackFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
+    } 
+    else {
+        Write-Error "CRITICAL ERROR: Could not locate the 'dist' folder contents inside novagrid-workspace. Check build output errors above."
         exit 1
     }
   displayName: 'Stage compiled assets strictly'
