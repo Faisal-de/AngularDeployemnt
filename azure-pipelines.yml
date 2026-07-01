@@ -17,24 +17,17 @@ steps:
   displayName: 'npm install and build telemetry-hub'
 
 - powershell: |
-    # Force the search strictly inside the compiled production dist directory
-    # This prevents accidentally grabbing the raw .ts source code files from the root workspace
-    $distPath = "novagrid-workspace\dist"
+    # Dynamically find the real COMPILED output folder by looking for main.js 
+    # This ignores your raw source code because raw source files end in .ts, not .js!
+    Write-Host "Locating the true compiled production distribution directory..."
+    $compiledOutputFolder = Get-ChildItem -Path . -Filter "main.js" -Recurse | Select-Object -First 1 -ExpandProperty DirectoryName
     
-    if (Test-Path $distPath) {
-        Write-Host "Searching for compiled production assets inside: $distPath"
-        $buildFolder = Get-ChildItem -Path $distPath -Filter "index.html" -Recurse | Select-Object -First 1 -ExpandProperty DirectoryName
-        
-        if ($buildFolder) {
-            Write-Host "SUCCESS: Found compiled production assets folder at: $buildFolder"
-            # Copy the true compiled .js, .css, and HTML files straight into the staging zone
-            Copy-Item -Path "$buildFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
-        } else {
-            Write-Error "CRITICAL ERROR: Found 'dist' folder, but index.html is missing inside it. Build might have failed."
-            exit 1
-        }
+    if ($compiledOutputFolder) {
+        Write-Host "SUCCESS: Found compiled production assets folder at: $compiledOutputFolder"
+        # Copy the true compiled .js, .css, and built index.html into the staging zone
+        Copy-Item -Path "$compiledOutputFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
     } else {
-        Write-Error "CRITICAL ERROR: The 'novagrid-workspace\dist' folder does not exist. Check if 'ng build' ran successfully."
+        Write-Error "CRITICAL ERROR: Could not find any compiled production assets (main.js is missing)! Ensure the Angular build completed successfully without errors."
         exit 1
     }
   displayName: 'Stage compiled assets strictly'
