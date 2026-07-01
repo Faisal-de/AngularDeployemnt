@@ -17,18 +17,27 @@ steps:
   displayName: 'npm install and build telemetry-hub'
 
 - powershell: |
-    # Dynamically find where Angular actually put the index.html file
-    $buildFolder = Get-ChildItem -Path . -Filter "index.html" -Recurse | Select-Object -First 1 -ExpandProperty DirectoryName
+    # Force the search strictly inside the compiled production dist directory
+    # This prevents accidentally grabbing the raw .ts source code files from the root workspace
+    $distPath = "novagrid-workspace\dist"
     
-    if ($buildFolder) {
-        Write-Host "Found build output folder at: $buildFolder"
-        # Copy the contents directly into the artifact staging area
-        Copy-Item -Path "$buildFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
+    if (Test-Path $distPath) {
+        Write-Host "Searching for compiled production assets inside: $distPath"
+        $buildFolder = Get-ChildItem -Path $distPath -Filter "index.html" -Recurse | Select-Object -First 1 -ExpandProperty DirectoryName
+        
+        if ($buildFolder) {
+            Write-Host "SUCCESS: Found compiled production assets folder at: $buildFolder"
+            # Copy the true compiled .js, .css, and HTML files straight into the staging zone
+            Copy-Item -Path "$buildFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
+        } else {
+            Write-Error "CRITICAL ERROR: Found 'dist' folder, but index.html is missing inside it. Build might have failed."
+            exit 1
+        }
     } else {
-        Write-Error "Could not find the built Angular assets (index.html missing)!"
+        Write-Error "CRITICAL ERROR: The 'novagrid-workspace\dist' folder does not exist. Check if 'ng build' ran successfully."
         exit 1
     }
-  displayName: 'Stage built assets safely'
+  displayName: 'Stage compiled assets strictly'
 
 - task: PublishBuildArtifacts@1
   inputs:
