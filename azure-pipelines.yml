@@ -10,25 +10,21 @@ steps:
     versionSpec: '20.x'
   displayName: 'Install Node.js'
 
-# STEP 1: Enter the true workspace folder and install dependencies
-- script: |
-    cd novagrid-workspace
-    npm install
+# STEP 1: Install packages directly in the current root folder
+- script: npm install
   displayName: 'npm install dependencies'
 
-# STEP 2: Enter the true workspace folder and run the pure production build
-- script: |
-    cd novagrid-workspace
-    npx ng build telemetry-hub-player --configuration=production
+# STEP 2: Run the build using the exact project name Angular demands ("telemetry-hub")
+- script: npx ng build telemetry-hub --configuration=production
   displayName: 'Execute Angular Production Build'
 
 # STEP 3: Stage the compiled distribution files directly from the true build directory
 - powershell: |
     Write-Host "Locating compiled production assets folder..."
     
-    # This matches the exact folder structure verified in your VS Code sidebar
-    $productionFolder = "novagrid-workspace\dist\telemetry-hub-player\browser"
-    $fallbackFolder = "novagrid-workspace\dist\telemetry-hub-player"
+    # Target the exact project name output folder
+    $productionFolder = "dist\telemetry-hub\browser"
+    $fallbackFolder = "dist\telemetry-hub"
     
     if (Test-Path $productionFolder) {
         Write-Host "SUCCESS: Target build directory found at: $productionFolder"
@@ -39,7 +35,7 @@ steps:
         Copy-Item -Path "$fallbackFolder\*" -Destination "$(Build.ArtifactStagingDirectory)" -Recurse -Force
     } 
     else {
-        Write-Error "CRITICAL ERROR: Could not locate the 'dist' folder contents inside novagrid-workspace. Check build output errors above."
+        Write-Error "CRITICAL ERROR: Could not locate the 'dist' folder contents. Check build output errors above."
         exit 1
     }
   displayName: 'Stage compiled assets strictly'
